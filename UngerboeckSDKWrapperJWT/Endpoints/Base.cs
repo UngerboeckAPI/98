@@ -15,8 +15,7 @@ namespace Ungerboeck.Api.Sdk.Endpoints
   public abstract class Base<TGenericUngerboeckModel> where TGenericUngerboeckModel : UngerboeckModel
   {
 
-    protected readonly ApiClient Client;
-    private List<int> validationOverrides = new List<int>();
+    protected readonly ApiClient Client;    
 
     protected Base(ApiClient api)
     {
@@ -238,17 +237,21 @@ namespace Ungerboeck.Api.Sdk.Endpoints
     }
 
     protected async Task<SearchResponse<T>> SearchAsync<T>(ApiClient client, string url, Base options) where T:TGenericUngerboeckModel
-    {
-      Util.PrepForLaunch(client, ref url, ref options, validationOverrides);
+    {    
+      HttpResponseMessage response = null;
+      var headers = new Dictionary<string, string>();
 
-      if (!url.Contains("/api/")) url = $"{Client.HttpClient.BaseAddress}/api/v1/{url}"; //ensures base address is present
+      if (client.GlobalOptions.TargetLoadBalancedServer != null){
+        foreach (string serverCookie in client.GlobalOptions.TargetLoadBalancedServer) headers.Add("Cookie", serverCookie); //Add targeted load balanaced server 
+      }
 
-      // Run a GetAsync on the URL given by the Initialization, concatenated with the RESTFUL operation
-      HttpResponseMessage response = await client.HttpClient.GetAsync(url).ConfigureAwait(false);
-       
-      if (await Util .ValidateResponse(client, response))
+      PrepForLaunch(client, ref url, ref headers, ref options);       
+
+      response = await CallSendAsync(client, url, response, headers).ConfigureAwait(false);
+
+      if (await Util.ValidateResponse(client, response))
       {
-        SetLoadBalancerCookie(client, response);
+        SetLoadBalancerCookie(client, response, headers);
 
         IEnumerable<T> list = await response.Content.ReadAsAsync<IEnumerable<T>>();  // Read back the item from the response
         string searchMetadata = response.Headers.GetValues("X-SearchMetadata").FirstOrDefault();
@@ -264,41 +267,55 @@ namespace Ungerboeck.Api.Sdk.Endpoints
     /// When searching and paging is used, the same load balance server needs to be used.
     /// To manually choose which load-balanced server to call, we can collect and set a cookie that forces a particular balancer.
     /// </summary>
-    private static void SetLoadBalancerCookie(ApiClient client, HttpResponseMessage response)
+    private static void SetLoadBalancerCookie(ApiClient client, HttpResponseMessage response, Dictionary<string,string> headers)
     {
       IEnumerable<string> responseCookies = response.Headers.SingleOrDefault(header => header.Key == "Set-Cookie").Value;
       if (responseCookies != null)
       {
+        client.GlobalOptions.TargetLoadBalancedServer = new List<string>();
+
         foreach (var cookie in responseCookies)
         {
-          if (client.HttpClient.DefaultRequestHeaders.Contains("Cookie")) client.HttpClient.DefaultRequestHeaders.Remove("Cookie");
-          client.HttpClient.DefaultRequestHeaders.Add("Cookie", cookie);
+          client.GlobalOptions.TargetLoadBalancedServer.Add(cookie);          
         }
       }
     }
 
     protected async Task<T> GetAsync<T>(ApiClient client, string url, Base options)
+    {      
+      HttpResponseMessage response = null;
+      var headers = new Dictionary<string, string>();
+
+      PrepForLaunch(client, ref url, ref headers, ref options);
+
+      response = await CallSendAsync(client, url, response, headers).ConfigureAwait(false);
+
+      return await HandleResponse<T>(client, response);      
+    }
+
+    private static async Task<HttpResponseMessage> CallSendAsync(ApiClient client, string url, HttpResponseMessage response, Dictionary<string, string> headers)
     {
       try
       {
-        HttpResponseMessage response = null;
+        if (!url.Contains("/api/")) url = $"{client.HttpClient.BaseAddress}/api/v1/{url}"; //ensures base address is present
 
-        Util.PrepForLaunch(client, ref url, ref options, validationOverrides);
-        try
+        using (var requestMessage =
+          new HttpRequestMessage(HttpMethod.Get, url))
         {
-          response = await client.HttpClient.GetAsync($"{client.HttpClient.BaseAddress}/api/v1/{url}").ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-          SetHttpClientError(client, ex);
-        }
+          foreach (KeyValuePair<string, string> header in headers)
+          {
+            requestMessage.Headers.Add(header.Key, header.Value);
+          }
 
-        return await HandleResponse<T>(client, response);
+          response = await client.HttpClient.SendAsync(requestMessage).ConfigureAwait(false);
+        }        
       }
-      finally
+      catch (Exception ex)
       {
-        Util.PostLaunch(client, ref validationOverrides);
+        SetHttpClientError(client, ex);
       }
+
+      return response;
     }
 
     protected Task<T> PostAsync<T>(ApiClient client, string URL, T item, Base options)
@@ -308,26 +325,20 @@ namespace Ungerboeck.Api.Sdk.Endpoints
 
     protected async Task<U> PostAsync<T, U>(ApiClient client, string URL, T item, Base options)
     {
+      HttpResponseMessage response = null;
+      var headers = new Dictionary<string, string>();
+
+      PrepForLaunch(client, ref URL, ref headers, ref options);
       try
       {
-        HttpResponseMessage response = null;
-
-        Util.PrepForLaunch(client, ref URL, ref options, validationOverrides);
-        try
-        {
-          response = await HttpClientExtensions.PostAsJsonAsync(client, $"{client.HttpClient.BaseAddress}/api/v1/{URL}", item).ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-          SetHttpClientError(client, ex);
-        }
-
-        return await HandleResponse<U>(client, response);
+        response = await HttpClientExtensions.PostAsJsonAsync(client, $"{client.HttpClient.BaseAddress}/api/v1/{URL}", item, headers).ConfigureAwait(false);
       }
-      finally
+      catch (Exception ex)
       {
-        Util.PostLaunch(client, ref validationOverrides);
+        SetHttpClientError(client, ex);
       }
+
+      return await HandleResponse<U>(client, response);
     }
 
     private static async Task<U> HandleResponse<U>(ApiClient client, HttpResponseMessage response)
@@ -352,56 +363,41 @@ namespace Ungerboeck.Api.Sdk.Endpoints
 
     protected async Task<U> PutAsync<T, U>(ApiClient client, string URL, T item, Base options)
     {
+      HttpResponseMessage response = null;
+      var headers = new Dictionary<string, string>();
+        
+      PrepForLaunch(client, ref URL, ref headers, ref options);
       try
       {
-        HttpResponseMessage response = null;
-        Util.PrepForLaunch(client, ref URL, ref options, validationOverrides);
-
-        try
-        {
-          response = await HttpClientExtensions.PutAsJsonAsync(client, $"{client.HttpClient.BaseAddress}/api/v1/{URL}", item).ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-          SetHttpClientError(client, ex);
-        }
-
-        return await HandleResponse<U>(client, response);
+        response = await HttpClientExtensions.PutAsJsonAsync(client, $"{client.HttpClient.BaseAddress}/api/v1/{URL}", item, headers).ConfigureAwait(false);
       }
-      finally
+      catch (Exception ex)
       {
-        Util.PostLaunch(client, ref validationOverrides);
+        SetHttpClientError(client, ex);
       }
+
+      return await HandleResponse<U>(client, response);
     }
 
     protected async Task<HttpResponseMessage> DeleteAsync(ApiClient client, string URL, Base options)
     {
+      HttpResponseMessage response = null;
+      var headers = new Dictionary<string, string>();
+        
+      PrepForLaunch(client, ref URL, ref headers, ref options);
       try
       {
-        HttpResponseMessage response = null;
-        Util.PrepForLaunch(client, ref URL, ref options, validationOverrides);
-        try
-        {
-          response = await HttpClientExtensions.DeleteAsJsonAsync(client, $"{client.HttpClient.BaseAddress}/api/v1/{URL}").ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-          SetHttpClientError(client, ex);
-        }
-
-        if (await Util.ValidateResponse(client, response))
-        {
-          return response;
-        }
-        return default;
+        response = await HttpClientExtensions.DeleteAsJsonAsync(client, $"{client.HttpClient.BaseAddress}/api/v1/{URL}").ConfigureAwait(false);
       }
-      finally
+      catch (Exception ex)
       {
-        Util.PostLaunch(client, ref validationOverrides);
+        SetHttpClientError(client, ex);
       }
+
+      return await HandleResponse<HttpResponseMessage>(client, response);   
     }
 
-    protected void SetValidation(bool? validation, ValidationCodes validationCode)
+    protected void SetValidation(List<int> validationOverrides, bool? validation, ValidationCodes validationCode)
     {
       if (validation == true) validationOverrides.Add((int)validationCode); //Note the '== true' is needed due to a nullable boolean
     }
@@ -418,6 +414,42 @@ namespace Ungerboeck.Api.Sdk.Endpoints
       client.LastResponseError = new Ungerboeck.Api.Models.Errors.ApiErrors(400, "HttpCallFailed",
                 $"HttpClient called failed.  Error returned: {ex.Message}",
                 Ungerboeck.Api.Models.Errors.ErrorSources.Sdk);
+    }
+
+    private void PrepForLaunch(ApiClient client, ref string URL, ref Dictionary<string, string> headers, ref Ungerboeck.Api.Models.Options.Base options)
+    {
+      Util.SetOptions(ref options);
+      if (AuthUtil.ShouldAutoRefresh(client)) AuthUtil.RefreshJWT(client);
+      URL = Util.BuildSelect(URL, options);
+
+      GetSubjectHeaders(ref headers, options);
+
+      List<int> validationOverrides = new List<int>();
+      CollectValidationOverridesFromOptions(ref validationOverrides, headers, options);
+      if (validationOverrides.Count > 0) AddValidationOverridesHeader(validationOverrides, headers);
+            
+      client.LastResponseError = null; //Clear out previous response errors, if any
+    }
+
+    protected virtual Dictionary<string, string> GetSubjectHeaders(ref Dictionary<string, string> headers, Models.Options.Base options)
+    {
+      return new Dictionary<string, string>();
+    }
+
+    protected virtual void CollectValidationOverridesFromOptions(ref List<int> validationOverrides, Dictionary<string, string> headers, Ungerboeck.Api.Models.Options.Base baseOptions)
+    {
+      return;
+    }
+
+    internal virtual void AddValidationOverridesHeader(List<int> validationOverrides, Dictionary<string, string> headers)
+    {      
+      headers.Add("X-ValidationOverrides", $"[{{\"Code\": {string.Join(",", validationOverrides)}}}]");
+    }
+
+    protected T GetOptions<T>(Base baseOptions)
+    {
+      if (baseOptions == null || baseOptions.GetType() != typeof(T)) return default(T);
+      return (T)System.Convert.ChangeType(baseOptions, typeof(T));
     }
   }
 }

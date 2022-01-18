@@ -25,7 +25,7 @@ namespace Ungerboeck.Api.Sdk.Endpoints
     /// <returns>A list of this subject's model.</returns>
     public new SearchResponse<EventsModel> Search(string orgCode, string searchOData, Search options = null)
     {
-      return base.Search(orgCode, searchOData, options);
+      return base.SearchSync(orgCode, searchOData, options);
     }
 
     /// <summary>
@@ -125,10 +125,15 @@ namespace Ungerboeck.Api.Sdk.Endpoints
     /// <param name="options">This contains optional configurations.</param>
     /// <returns>Newly added EventsModel</returns>
     public Task<EventsModel> AddFromProfileAsync(AddFromEventProfileModel eventProfile, Ungerboeck.Api.Models.Options.Subjects.Events options = null)
-    {
-      SetValidation(options?.BypassBookingConflictCheck, ValidationCodes.BypassBookingConflictCheck);
+    {      
       Task<EventsModel> response = PostAsync<AddFromEventProfileModel, EventsModel>(Client, $"Events/AddFromProfile/", eventProfile, options);
       return response;
+    }
+
+    protected override void CollectValidationOverridesFromOptions(ref List<int> validationOverrides, Dictionary<string, string> headers, Ungerboeck.Api.Models.Options.Base baseOptions)
+    {
+      var options = GetOptions<Models.Options.Subjects.Events>(baseOptions);      
+      SetValidation(validationOverrides, options?.BypassBookingConflictCheck, ValidationCodes.BypassBookingConflictCheck);            
     }
   }
 }

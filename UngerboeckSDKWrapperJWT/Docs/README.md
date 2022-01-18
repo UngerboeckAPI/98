@@ -3,6 +3,15 @@ SDK for the Ungerboeck API
 
 You found the code tools for the Ungerboeck API!  This is the main SDK package you probably want to get started quickly on the Ungerboeck API.
 
+## Getting Started
+If you are looking to get going as fast as possible, here are step by step instructions.
+
+Find and download your Ungerboeck version on [the examples page](https://github.com/UngerboeckAPI).  For example, Ungerboeck .98 would use the [98 example project](https://github.com/UngerboeckAPI/98).
+
+Navigate to StartHere/Program.cs.  Fill in the values at the top of Main() in relation to your Ungerboeck URL and your API User values (Found in Ungerboeck -> Main Menu -> Api Users).
+
+After that, running the program should return an Account name.
+
 ## Ungerboeck.Api.Sdk (Formerly Ungerboeck209XSDKWrapper/UngerboeckSDKWrapper)
 Contains pre-made wrapper calls to quickly get your client connected to the Ungerboeck API.  This  coexists on Github to allow you to see the code.  
 [Find the nuget package here.](https://www.nuget.org/packages/Ungerboeck.Api.Sdk/)

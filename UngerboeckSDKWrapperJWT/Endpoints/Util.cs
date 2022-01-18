@@ -207,12 +207,6 @@ namespace Ungerboeck.Api.Sdk.Endpoints
         return type.Name.Substring(0, type.Name.LastIndexOf("Model"));
     }
 
-    internal static void PostLaunch(ApiClient client, ref List<int> validationOverrides)
-    {
-      Util.RemoveOverrides(client);
-      validationOverrides = new List<int>();
-    }
-
     internal static string BuildRESTfulURLFromParameters(object parameters)
     {
       //This forms a URL of "parameter1/parameter2/..."
@@ -227,35 +221,12 @@ namespace Ungerboeck.Api.Sdk.Endpoints
       return $"/{string.Join("/", parmArray)}";
     }
 
-    internal static void PrepForLaunch(ApiClient client, ref string URL, ref Ungerboeck.Api.Models.Options.Base options, List<int> validationOverrides)
-    {
-      SetOptions(ref options);
-      if (AuthUtil.ShouldAutoRefresh(client)) AuthUtil.RefreshJWT(client);
-      URL = BuildSelect(URL, options);
-
-      AddValidationOverrides(client, validationOverrides);
-
-      client.LastResponseError = null; //Clear out previous response errors, if any
-    }
-
-    private static void AddValidationOverrides(ApiClient client, List<int> validationOverrides)
-    {
-      if (validationOverrides == null || validationOverrides.Count == 0) return;
-      if (client.HttpClient.DefaultRequestHeaders.Contains("X-ValidationOverrides")) client.HttpClient.DefaultRequestHeaders.Remove("X-ValidationOverrides");
-      client.HttpClient.DefaultRequestHeaders.Add("X-ValidationOverrides", $"[{{\"Code\": {string.Join(",", validationOverrides)}}}]");
-    }
-
-    private static void RemoveOverrides(ApiClient client)
-    {
-      if (client.HttpClient.DefaultRequestHeaders.Contains("X-ValidationOverrides")) client.HttpClient.DefaultRequestHeaders.Remove("X-ValidationOverrides");
-    }
-
-    private static void SetOptions<T>(ref T options) where T : new()
+    internal static void SetOptions<T>(ref T options) where T : new()
     {
       if (options == null) options = new T();
     }
 
-    private static string BuildSelect(string URL, Ungerboeck.Api.Models.Options.Base options)
+    internal static string BuildSelect(string URL, Ungerboeck.Api.Models.Options.Base options)
     {
       if (options?.Select == null || options.Select.Count == 0) return URL;
 

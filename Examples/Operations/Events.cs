@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Examples.Operations
 {
@@ -25,11 +26,35 @@ namespace Examples.Operations
     }
 
     /// <summary>
+    /// A basic async retrieve example
+    /// </summary>   
+    public async Task<EventsModel> GetAsync(string orgCode, int eventId)
+    {
+      Task<EventsModel> getTask = apiClient.Endpoints.Events.GetAsync(orgCode, eventId);
+
+      //Put any other tasks here that don't have to wait for the accounts to retrieve
+
+      return await getTask;      
+    }
+
+    /// <summary>
     /// A search example.  Check out the 'Search using the API' knowledge base article for more info.
     /// </summary> 
     public SearchResponse<EventsModel> Search(string orgCode, string searchValue)
     {      
       return apiClient.Endpoints.Events.Search( orgCode, $"{nameof(EventsModel.Description)} eq '{searchValue}'");
+    }
+
+    /// <summary>
+    /// This method demonstrates async searching
+    /// </summary>
+    public async Task<SearchResponse<EventsModel>> SearchAsync(string orgCode, string searchValue)
+    {
+      var searchTask = apiClient.Endpoints.Events.SearchAsync(orgCode, $"{nameof(EventsModel.Description)} eq '{searchValue}'");
+
+      //Put any other tasks here that don't have to wait for the api call
+
+      return await searchTask;
     }
 
     /// <summary>
@@ -65,6 +90,29 @@ namespace Examples.Operations
     }
 
     /// <summary>
+    /// A basic async retrieve example
+    /// </summary>   
+    public async Task<EventsModel> AddAsync(string orgCode, string eventName, string accountCode)
+    {
+      var myEvent = new EventsModel
+      {
+        Organization = orgCode,
+        Description = eventName,
+        Account = accountCode,
+        StartDate = DateTime.Now,
+        EndDate = DateTime.Now,
+      };
+
+      var eventTask = apiClient.Endpoints.Events.AddAsync(myEvent);
+
+      //Put any other tasks here that don't have to wait for the accounts to update
+
+      myEvent = await eventTask;
+
+      return myEvent;
+    }
+
+    /// <summary>
     /// A basic edit example
     /// </summary> 
     public EventsModel Edit(string orgCode, int eventID, string newEventName)
@@ -74,6 +122,20 @@ namespace Examples.Operations
       myEvent.Description = newEventName;
 
       return apiClient.Endpoints.Events.Update( myEvent);
+    }
+
+    /// <summary>
+    /// A basic async edit example
+    /// </summary>   
+    public async Task<EventsModel> UpdateAsync(EventsModel myEvent)
+    {
+      Task<EventsModel> eventTask = apiClient.Endpoints.Events.UpdateAsync(myEvent);
+
+      //Put any other tasks here that don't have to wait for the event to update
+
+      myEvent = await eventTask;
+
+      return myEvent;
     }
 
     public EventsModel CancelEvent(string orgCode, int eventID)
@@ -249,6 +311,28 @@ namespace Examples.Operations
     }
 
     /// <summary>
+    /// A basic async example of adding an event from a profile.
+    /// </summary>
+    /// <param name="orgCode"></param>
+    /// <param name="profileId"></param>
+    /// <param name="date"></param>
+    /// <returns></returns>
+    public async Task<EventsModel> AddFromProfileAsync(string orgCode, int profileId, DateTime date)
+    {
+      var model = new AddFromEventProfileModel()
+      {
+        OrganizationCode = orgCode, //Required
+        ProfileID = profileId, //Event Profile ID to use. Required
+        CopyToDate = date // This is the only required option. Everything else can be defaulted from the profile
+      };
+
+      var task = apiClient.Endpoints.Events.AddFromProfileAsync(model);
+      //Put any other tasks here that don't have to wait for the accounts to update
+
+      return await task;
+    }
+
+    /// <summary>
     /// An example of adding an event from a profile with options included.
     /// </summary>
     /// <param name="orgCode"></param>
@@ -256,7 +340,7 @@ namespace Examples.Operations
     /// <param name="date"></param>
     /// <param name="accountId"></param>
     /// <returns></returns>
-    public EventsModel AddFromEventProfileAdvanced(string orgCode, int profileId, DateTime date, string accountId)
+    public EventsModel AddFromProfileAdvanced(string orgCode, int profileId, DateTime date, string accountId)
     {
       var model = new AddFromEventProfileModel()
       {

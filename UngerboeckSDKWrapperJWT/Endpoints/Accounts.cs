@@ -102,8 +102,6 @@ namespace Ungerboeck.Api.Sdk.Endpoints
     /// <returns>A newly added, single model for this subject.</returns>
     public Task<AllAccountsModel> AddAsync(AllAccountsModel model, Ungerboeck.Api.Models.Options.Subjects.Accounts options = null)
     {
-      SetValidation(options?.BlockDuplicateAccounts, ValidationCodes.BlockDuplicateAccounts);
-
       return base.AddAsync(model, options);
     }
 
@@ -125,6 +123,12 @@ namespace Ungerboeck.Api.Sdk.Endpoints
     public Task<Ungerboeck.Api.Models.Bulk.BulkResponseModel> BulkAsync(Ungerboeck.Api.Models.Bulk.BulkRequestModel bulkRequestModel, Ungerboeck.Api.Models.Options.Subjects.Accounts options = null)
     {
       return base.BulkAsync(bulkRequestModel, options);
+    }
+
+    protected override void CollectValidationOverridesFromOptions(ref List<int> validationOverrides, Dictionary<string, string> headers, Ungerboeck.Api.Models.Options.Base baseOptions)
+    {
+      var options = GetOptions<Models.Options.Subjects.Accounts>(baseOptions);
+      SetValidation(validationOverrides, options?.BlockDuplicateAccounts, ValidationCodes.BlockDuplicateAccounts);
     }
   }
 }

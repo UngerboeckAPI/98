@@ -2,6 +2,7 @@
 using Ungerboeck.Api.Models.Subjects;
 using System;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Ungerboeck.Api.Sdk.Endpoints
 {
@@ -34,17 +35,26 @@ namespace Ungerboeck.Api.Sdk.Endpoints
     /// <returns>An UngerboeckAuthenticationCheck which shows the results</returns>
     public Task<UngerboeckAuthenticationCheck> CheckUngerboeckUserAuthenticationAsync(string userIdToCheck, string userPasswordToCheck, Ungerboeck.Api.Models.Options.Subjects.ApiUtility options = null)
     {
-      try
+      if (options == null) options = new Models.Options.Subjects.ApiUtility();
+
+      if (string.IsNullOrWhiteSpace(options.CheckAuthenticationUserId) || string.IsNullOrWhiteSpace(options.CheckAuthenticationUserPassword))
       {
-        Client.HttpClient.DefaultRequestHeaders.Add("CheckAuthentication", Convert.ToBase64String(
-            System.Text.Encoding.ASCII.GetBytes($"{userIdToCheck}:{userPasswordToCheck}")));
+        options.CheckAuthenticationUserId = userIdToCheck;
+        options.CheckAuthenticationUserPassword = userPasswordToCheck;
+      }
 
         return GetAsync<UngerboeckAuthenticationCheck>(Client, "sdk_initialize", options);
-      }
-      finally
-      {
-        Client.HttpClient.DefaultRequestHeaders.Remove("CheckAuthentication");
-      }
+    }
+
+    protected override Dictionary<string, string> GetSubjectHeaders(ref Dictionary<string, string> headers, Models.Options.Base baseOptions)
+    {
+      var options = GetOptions<Models.Options.Subjects.ApiUtility>(baseOptions);
+
+      if (options.CheckAuthenticationUserId != null || options.CheckAuthenticationUserPassword != null)
+          headers.Add("CheckAuthentication", Convert.ToBase64String(
+                System.Text.Encoding.ASCII.GetBytes($"{options.CheckAuthenticationUserId}:{options.CheckAuthenticationUserPassword}")));
+
+      return headers;
     }
   }
 }

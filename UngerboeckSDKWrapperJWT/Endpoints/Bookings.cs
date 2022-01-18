@@ -44,8 +44,6 @@ namespace Ungerboeck.Api.Sdk.Endpoints
     /// <returns>An updated, single model for this subject.</returns>
     public BookingsModel Update(BookingsModel model, Ungerboeck.Api.Models.Options.Subjects.Bookings options = null)
     {
-      SetValidation(options?.BypassBookingConflictCheck, ValidationCodes.BypassBookingConflictCheck);
-
       return base.Update(new { model.OrganizationCode, model.Event, model.SequenceNumber }, model, options);
     }
 
@@ -57,8 +55,6 @@ namespace Ungerboeck.Api.Sdk.Endpoints
     /// <returns>A newly added, single model for this subject.</returns>
     public BookingsModel Add(BookingsModel model, Ungerboeck.Api.Models.Options.Subjects.Bookings options = null)
     {
-      SetValidation(options?.BypassBookingConflictCheck, ValidationCodes.BypassBookingConflictCheck);
-
       return base.Add(model, options);
     }
 
@@ -69,9 +65,13 @@ namespace Ungerboeck.Api.Sdk.Endpoints
     /// <returns>BuldResponseModel, containing the results of the bulk process</returns>
     public Ungerboeck.Api.Models.Bulk.BulkResponseModel Bulk(Ungerboeck.Api.Models.Bulk.BulkRequestModel bulkRequestModel, Ungerboeck.Api.Models.Options.Subjects.Bookings options = null)
     {
-      SetValidation(options?.BypassBookingConflictCheck, ValidationCodes.BypassBookingConflictCheck);
-
       return base.Bulk(bulkRequestModel, options);
+    }
+
+    protected override void CollectValidationOverridesFromOptions(ref List<int> validationOverrides, Dictionary<string, string> headers, Ungerboeck.Api.Models.Options.Base baseOptions)
+    {
+      var options = GetOptions<Models.Options.Subjects.Bookings>(baseOptions);
+      SetValidation(validationOverrides, options?.BypassBookingConflictCheck, ValidationCodes.BypassBookingConflictCheck);
     }
   }
 }

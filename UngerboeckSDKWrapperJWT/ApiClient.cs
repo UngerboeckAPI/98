@@ -1,8 +1,9 @@
 ﻿using System.Net.Http;
+using System;
 
 namespace Ungerboeck.Api.Sdk
 {
-  public class ApiClient
+  public class ApiClient : IDisposable
   {
     [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
     protected internal readonly HttpClient HttpClient;
@@ -13,7 +14,7 @@ namespace Ungerboeck.Api.Sdk
     [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
     private EndpointCollection endpointCollection;
 
-
+    private bool _disposed;
 
     /// <summary>
     /// Use a Authorization.Jwt object to ready a new API Client, used to make calls to endpoints.  This is a process fully local to your client and does not make any HTTP calls.
@@ -52,6 +53,24 @@ namespace Ungerboeck.Api.Sdk
           endpointCollection = new EndpointCollection(this);
         }
         return endpointCollection;
+      }
+    }
+
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+    protected virtual void Dispose(bool disposing)
+    {
+      if (!_disposed)
+      {
+        if (disposing)
+        {
+          HttpClient.Dispose();          
+        }
+         
+        _disposed = true;
       }
     }
 

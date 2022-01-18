@@ -5,6 +5,7 @@ using Ungerboeck.Api.Models.Subjects;
 using Ungerboeck.Api.Models.Search;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Examples.Operations
 {
@@ -23,11 +24,35 @@ namespace Examples.Operations
     }
 
     /// <summary>
+    /// A basic retrieve example
+    /// </summary>
+    public async Task<ServiceOrdersModel> GetAsync(string orgCode, int orderNumber)
+    {
+      var getTask = apiClient.Endpoints.ServiceOrders.GetAsync(orgCode, orderNumber);
+
+      //Put any other tasks here that don't have to wait for the accounts to retrieve
+
+      return await getTask;
+    }
+
+    /// <summary>
     /// A search example.  Check out the 'Search using the API' knowledge base article for more info.
     /// </summary>   
     public SearchResponse<ServiceOrdersModel> Search(string orgCode, string searchValue)
     {
       return apiClient.Endpoints.ServiceOrders.Search(orgCode, $"{nameof(ServiceOrdersModel.Account)} eq '{searchValue}'");
+    }
+
+    /// <summary>
+    /// A search async example.  Check out the 'Search using the API' knowledge base article for more info.
+    /// </summary>   
+    public async Task<SearchResponse<ServiceOrdersModel>> SearchAsync(string orgCode, string searchValue)
+    {
+      var searchTask = apiClient.Endpoints.ServiceOrders.SearchAsync(orgCode, $"{nameof(ServiceOrdersModel.Account)} eq '{searchValue}'");
+
+      //Put any other tasks here that don't have to wait for the api call
+
+      return await searchTask;
     }
 
     /// <summary>
@@ -71,7 +96,35 @@ namespace Examples.Operations
 
       return apiClient.Endpoints.ServiceOrders.Add( myServiceOrder);
     }
-    
+
+    /// <summary>
+    /// A basic add example
+    /// </summary>
+    /// <param name="orgCode">Organization code</param>
+    /// <param name="event">The event ID of the event attached to the order</param>
+    /// <param name="orderStatus">This is the user-configurable status code on the order</param>
+    /// <param name="accountCode">This should be a single account code</param>
+    /// <param name="function">The event ID of the event attached to the order</param>
+    /// <param name="billToAccount"></param>
+    /// <param name="priceList">The price list code. You can find this on the Price List window in Ungerboeck under the "Code" field (Database column CC715_PRICE_LIST).</param>    
+    public async Task<ServiceOrdersModel> AddAsync(string orgCode, int @event, string orderStatus, string accountCode, int function, string billToAccount, string priceList)
+    {
+      var myServiceOrder = new ServiceOrdersModel
+      {
+        OrganizationCode = orgCode,
+        Event = @event,
+        OrderStatus = orderStatus,
+        Account = accountCode,
+        Function = function,
+        BillToAccount = billToAccount,
+        PriceList = priceList,
+      };
+
+      var task = apiClient.Endpoints.ServiceOrders.AddAsync(myServiceOrder);
+
+      return await task;
+    }
+
     /// <summary>
     /// A basic add example
     /// </summary>
@@ -116,6 +169,24 @@ namespace Examples.Operations
       myServiceOrder.OrderStatus = orderStatus;
 
       return apiClient.Endpoints.ServiceOrders.Update( myServiceOrder);
+    }
+
+
+    public async Task<ServiceOrdersModel> EditAsync(string orgCode, int orderNumber, string orderStatus)
+    {
+      var myServiceOrderTask = apiClient.Endpoints.ServiceOrders.GetAsync(orgCode, orderNumber);
+
+      //Place code here that's not dependent on the retrieved order
+
+      var myServiceOrder = await myServiceOrderTask;
+
+      myServiceOrder.OrderStatus = orderStatus;
+
+      myServiceOrderTask = apiClient.Endpoints.ServiceOrders.UpdateAsync(myServiceOrder);
+
+      //This area can also be used for other independent code
+
+      return await myServiceOrderTask;
     }
 
     /// <summary>
@@ -186,6 +257,28 @@ namespace Examples.Operations
     /// <summary>
     /// Move order example
     /// </summary>
+    /// <param name="orderNumber">Set OrderNumber as an integers of the order number to move</param>
+    /// <param name="newEventID">This is the destination event ID.  You can find this attached this to the Events window in Ungerboeck</param>
+    /// <param name="functionId">This is the destination function ID on the destination event. This is required for service orders</param>
+    public async Task<HttpResponseMessage> MoveOrderAsync(string orgCode, int orderNumber, int newEventID, int functionId)
+    {
+      var myserviceOrder = new MoveOrderModel
+      {
+        OrganizationCode = orgCode,
+        OrderNumber = orderNumber,
+        DestinationEventID = newEventID,
+        Function = functionId,
+        KeepDateTimes = "N" //If "Y", the original order item start/end date will be preserved.  If "N", the moved order will adapt to the function start/end date.
+      };
+
+      var task = apiClient.Endpoints.ServiceOrders.MoveOrderAsync(myserviceOrder);
+
+      return await task;
+    }
+
+    /// <summary>
+    /// Move order example
+    /// </summary>
     /// <param name="orderNumber">Set OrderNumber as an array of integers</param>
     /// <param name="newEventID">This is the destination event ID.  You can find this attached this to the Events window in Ungerboeck</param>
     /// <param name="functionId">This is the destination function ID on the destination event. This is required for service orders</param>
@@ -205,9 +298,45 @@ namespace Examples.Operations
       return apiClient.Endpoints.ServiceOrders.MoveOrdersBulk( mymoveBulkOrder);
     }
 
+    /// <summary>
+    /// Move order example
+    /// </summary>
+    /// <param name="orderNumber">Set OrderNumber as an array of integers</param>
+    /// <param name="newEventID">This is the destination event ID.  You can find this attached this to the Events window in Ungerboeck</param>
+    /// <param name="functionId">This is the destination function ID on the destination event. This is required for service orders</param>
+    public async Task<IEnumerable<MoveOrdersBulkErrorsModel>> MoveOrderBulkAsync(string orgCode, int[] orderNumber, int newEventID, int functionId)
+    {
+      var mymoveBulkOrder = new MoveOrdersBulkModel
+      {
+        OrganizationCode = orgCode,
+        OrderNumber = orderNumber,
+        DestinationEventID = newEventID,
+        Function = functionId,
+        KeepDateTimes = "N" //If "Y", the original order item start/end date will be preserved.  If "N", the moved order will adapt to the function start/end date.
+      };
+
+      //For bulk operations, 200 only signifies that the process successfully ran.  Individual items might have had issues saving.  Check the response object for bulk errors.
+      //One or more errors with saving the items if an error object was returned.        
+      var task = apiClient.Endpoints.ServiceOrders.MoveOrdersBulkAsync(mymoveBulkOrder);
+
+      //independent code here
+
+      return await task;
+
+    }
+
     public void CompleteWorkOrder(string orgCode, int orderNumber)
     {
       apiClient.Endpoints.ServiceOrders.CompleteWorkOrders( orgCode, orderNumber);
+    }
+
+    public async Task<HttpResponseMessage> CompleteWorkOrderAsync(string orgCode, int orderNumber)
+    {
+      var task = apiClient.Endpoints.ServiceOrders.CompleteWorkOrdersAsync(orgCode, orderNumber);
+      
+      //independent code here
+
+      return await task;
     }
 
     #region "Booth Orders"

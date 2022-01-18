@@ -52,7 +52,7 @@ namespace Examples.Operations
     }
 
     /// <summary>
-    /// A basic async retrieve example
+    /// A basic async edit example
     /// </summary>   
     public async Task<List<AllAccountsModel>> UpdateAsync(AllAccountsModel account1, AllAccountsModel account2)
     {

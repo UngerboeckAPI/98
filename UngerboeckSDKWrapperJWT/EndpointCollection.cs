@@ -611,6 +611,26 @@ namespace Ungerboeck.Api.Sdk
       }
     }
 
+    private EventTaskDetails EventTaskDetailsApi;
+    public EventTaskDetails EventTaskDetails
+    {
+      get
+      {
+        if (EventTaskDetailsApi == null) EventTaskDetailsApi = new EventTaskDetails(client);
+        return EventTaskDetailsApi;
+      }
+    }
+
+    private EventTaskUsers EventTaskUsersApi;
+    public EventTaskUsers EventTaskUsers
+    {
+      get
+      {
+        if (EventTaskUsersApi == null) EventTaskUsersApi = new EventTaskUsers(client);
+        return EventTaskUsersApi;
+      }
+    }
+
     private Exhibitors ExhibitorsApi;
     public Exhibitors Exhibitors
     {
@@ -1038,6 +1058,16 @@ namespace Ungerboeck.Api.Sdk
       {
         if (MeetingsApi == null) MeetingsApi = new Meetings(client);
         return MeetingsApi;
+      }
+    }
+
+    private MembershipAccountItems MembershipAccountItemsApi;
+    public MembershipAccountItems MembershipAccountItems
+    {
+      get
+      {
+        if (MembershipAccountItemsApi == null) MembershipAccountItemsApi = new MembershipAccountItems(client);
+        return MembershipAccountItemsApi;
       }
     }
 
@@ -1658,6 +1688,16 @@ namespace Ungerboeck.Api.Sdk
       {
         if (StatementHeadersApi == null) StatementHeadersApi = new StatementHeaders(client);
         return StatementHeadersApi;
+      }
+    }
+
+    private Tasks TasksApi;
+    public Tasks Tasks
+    {
+      get
+      {
+        if (TasksApi == null) TasksApi = new Tasks(client);
+        return TasksApi;
       }
     }
 
