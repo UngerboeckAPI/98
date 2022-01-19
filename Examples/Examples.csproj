@@ -243,8 +243,8 @@
     <PackageReference Include="Newtonsoft.Json">
       <Version>13.0.1</Version>
     </PackageReference>
-    <PackageReference Include="Ungerboeck.Api.Sdk">
-      <Version>1.98.220117.1830</Version>
+    <PackageReference Include="Ungerboeck.Api.Models">
+      <Version>1.98.220119.1326</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

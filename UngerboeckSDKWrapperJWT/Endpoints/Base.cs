@@ -242,7 +242,10 @@ namespace Ungerboeck.Api.Sdk.Endpoints
       var headers = new Dictionary<string, string>();
 
       if (client.GlobalOptions.TargetLoadBalancedServer != null){
-        foreach (string serverCookie in client.GlobalOptions.TargetLoadBalancedServer) headers.Add("Cookie", serverCookie); //Add targeted load balanaced server 
+        string targetLoadBalancedServerCookie=string.Empty;
+        foreach (string serverCookie in client.GlobalOptions.TargetLoadBalancedServer) targetLoadBalancedServerCookie += serverCookie.Substring(0, serverCookie.IndexOf(';')) + ";"; //Add targeted load balanaced server 
+        if (headers.ContainsKey("Cookie")) headers.Remove("Cookie");
+        headers.Add("Cookie", targetLoadBalancedServerCookie.Trim(';'));
       }
 
       PrepForLaunch(client, ref url, ref headers, ref options);       
@@ -276,7 +279,7 @@ namespace Ungerboeck.Api.Sdk.Endpoints
 
         foreach (var cookie in responseCookies)
         {
-          client.GlobalOptions.TargetLoadBalancedServer.Add(cookie);          
+          if (cookie.StartsWith("AWS")) client.GlobalOptions.TargetLoadBalancedServer.Add(cookie);          
         }
       }
     }
@@ -297,7 +300,7 @@ namespace Ungerboeck.Api.Sdk.Endpoints
     {
       try
       {
-        if (!url.Contains("/api/")) url = $"{client.HttpClient.BaseAddress}/api/v1/{url}"; //ensures base address is present
+        if (url != null && !url.Contains("/api/")) url = $"{client.HttpClient.BaseAddress}/api/v1/{url}"; //ensures base address is present
 
         using (var requestMessage =
           new HttpRequestMessage(HttpMethod.Get, url))
