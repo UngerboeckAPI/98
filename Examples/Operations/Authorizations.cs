@@ -89,6 +89,26 @@ namespace Examples.Operations
     }
 
 
+    /// <summary>
+    /// Example showing setting NotBefore (NBF).  This is useful if you wish to delay the validity of the token, or if your local clock time is heavily skewed from the server.  This value should be UTC.
+    /// </summary>
+    /// <param name="notBefore">Default is utcNow.</param>
+    /// <param name="apiUserId">The API User ID.  You get this from the API User window, found in the Ungerboeck main menu.</param>
+    /// <param name="secret">The API User secret GUIDs. You get this from the API User window, found in the Ungerboeck main menu.</param>
+    /// <param name="key">One of the API User key GUIDs.  You get this from the key grid on the API User window, found in the Ungerboeck main menu.</param>
+    /// <param name="ungerboeckUri">Your Ungerboeck site.  This includes the 'prod' or 'test', if applicable.</param>
+    /// <param name="proxiedUserID">Optional.  If the API User allows proxied users, this would be the User ID of the user you wish the API User to pretend to be.</param>
+    /// <param name="minutes">This is the number of minutes before your generated JWT expires.</param>
+    /// <returns></returns>    
+    public ApiClient MakeApiClientWithNotBefore(DateTime notBefore, string apiUserId, string secret, string key, string ungerboeckUri, string proxiedUserID = null, int minutes = 1)
+    {
+
+      GetApiClientParameters(apiUserId, secret, key, proxiedUserID, ungerboeckUri, false, minutes, out Jwt auth, out Initialization initOptions);
+
+      auth.NotBefore = notBefore; //This is optional but will apply if you set it.
+
+      return new ApiClient(auth, initOptions);
+    }
 
   }
 }

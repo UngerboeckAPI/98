@@ -35,5 +35,29 @@ namespace Ungerboeck.Api.Sdk.Endpoints
     {
       return base.Get(new { orgCode, batchSequence, sequence }, options);
     }
+
+    
+    /// <summary>
+    /// Use this endpoint to edit a single entry of this subject.
+    /// </summary>
+    /// <param name="model">This should contain a filled model of this subject.  Note that any null model properties will be ignored for the save.</param>
+    /// <param name="options">This contains optional configurations.</param>
+    /// <returns>An updated, single model for this subject.</returns>
+    public StatementHeadersModel Update(StatementHeadersModel model, Ungerboeck.Api.Models.Options.Subjects.StatementHeaders options = null)
+    {
+      return base.Update(new { model.Organization, model.BatchSequence, model.Sequence }, model, options);
+    }
+
+    
+    /// <summary>
+    /// Use this endpoint to add a single entry of this subject.
+    /// </summary>
+    /// <param name="model">This should contain a filled model of this subject.  Note that any null model properties will be ignored for the save.</param>
+    /// <param name="options">This contains optional configurations.</param>
+    /// <returns>A newly added, single model for this subject.</returns>
+    public StatementHeadersModel Add(StatementHeadersModel model, Ungerboeck.Api.Models.Options.Subjects.StatementHeaders options = null)
+    {
+      return base.Add(model, options);
+    }
   }
 }

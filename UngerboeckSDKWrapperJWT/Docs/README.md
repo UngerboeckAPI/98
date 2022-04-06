@@ -30,3 +30,6 @@ At any time, you can see the matching Ungerboeck version of Ungerboeck.Api.Model
 
 A related tip about upgrading the SDK: The Ungerboeck.Api.Models and Ungerboeck.Api.Sdk packages are designed to be forwards compatible.  Upgrading from nuget to keep up with you Ungerboeck version isn't necessary.  You typically only upgrade to take advantage of new features.
 
+# More Info
+More infomration can be found [in our knowledgebase](https://supportcenter.ungerboeck.com/hc/en-us/sections/115001365327-API-Basics).
+

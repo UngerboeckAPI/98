@@ -264,7 +264,7 @@ namespace Examples.Operations
     {
       //This uses Accounts as an example, but this is universal across all API calls
 
-      //ThrowErrorIntensity.UnexpectedClientOrServerErrors - No errors are thrown.  Errors are only logged to the Api Client object (ApiClient.LastResponseError).
+      //ThrowErrorIntensity.UnexpectedClientOrServerErrors - Wrapper should only throw exceptions on internal server errors (500).  Exceptions are otherwise only included in the ApiClient.LastResponseError info.
       apiClient.GlobalOptions.ThrowErrorIntensity = Ungerboeck.Api.Models.Options.ThrowErrorIntensity.UnexpectedServerErrorsOnly;
 
       var account = apiClient.Endpoints.Accounts.Get("10", "FAKEACCT"); //Assuming FAKEACCT is not a real account code, this will retrieve as null without a thrown error since it's a Not Found (404)
@@ -379,6 +379,18 @@ namespace Examples.Operations
       {
         return $"LastName eq '{lastName}'";
       }
+    }
+
+    /// <summary>
+    /// How to use ClearFlags.
+    /// </summary> 
+    public EventsModel EditWithClearFlag(string orgCode, int eventID)
+    {
+      var myEvent = apiClient.Endpoints.Events.Get(orgCode, eventID);
+
+      myEvent.ActualCost = USISDKConstants.ClearFlags.IntegerNull;  //If you wish to NULL a value, you can use ClearFlags.  There's a specific clear flag for every type.
+
+      return apiClient.Endpoints.Events.Update(myEvent);  //This will clear out ActualCost on this event.
     }
 
   }

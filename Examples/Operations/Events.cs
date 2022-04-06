@@ -86,7 +86,9 @@ namespace Examples.Operations
         EndDate = DateTime.Now,
       };
 
-      return apiClient.Endpoints.Events.Add( myEvent);
+      //var options = new Ungerboeck.Api.Models.Options.Subjects.Events() { BypassBookingConflictCheck = true }; //You can use this if any bookings are implicitly added on the event to avoid booking conflict warnings
+
+      return apiClient.Endpoints.Events.Add(myEvent);
     }
 
     /// <summary>
@@ -194,102 +196,104 @@ namespace Examples.Operations
     /// </summary>
     public EventsModel EditAdvanced(string orgCode, int eventID)
     {
-        const string myAccount = "RAYNOR";
-        const string myParentAccount = "COMBINE";
-        const string myContactAccount = "LSTRIDER";
-        const int otherEventID = 11111;
+      const string myAccount = "RAYNOR";
+      const string myParentAccount = "COMBINE";
+      const string myContactAccount = "LSTRIDER";
+      const int otherEventID = 11111;
 
-        var myEvent = apiClient.Endpoints.Events.Get( orgCode, eventID);
+      var myEvent = apiClient.Endpoints.Events.Get(orgCode, eventID);
 
-        myEvent.Description = "Modified Description";
-        myEvent.SecondCoordinator = myAccount;
-        myEvent.ThirdCoordinator = myAccount;
-        myEvent.FourthCoordinator = myAccount;
-        myEvent.Abbreviation = "MD";
-        myEvent.Account = "COMBINE"; //Just like in Ungerboeck, you may change the account even after an event is created.                                                                                                            
-        myEvent.ActualAttendance = 5;
-        myEvent.ActualCost = 5;
-        myEvent.ActualRevenue = 5;
-        myEvent.AlternateEvent = otherEventID;
-        myEvent.AnchorVenue = "HALL-A"; //Code value for anchor venue                                                                                                                                                       
-        myEvent.Attendance = 5;
-        myEvent.BillTo = myParentAccount; //Account code of bill to account                                                                                                                                                 
-        myEvent.BillToContact = myContactAccount;  //Account code of bill-to contact                                                                                                                                        
-        myEvent.BoxOffice = "Y"; //Y or N                                                                                                                                                                                   
-        myEvent.Category = "CO"; //Category code for event categories                                                                                                                                                       
-        myEvent.Class = "EDU"; //Class code for event classes                                                                                                                                                               
-        myEvent.Contact = myContactAccount;
-        myEvent.ContractRequired = "Y";
-        myEvent.Coordinator = myContactAccount;
-        myEvent.Decision = DateTime.Now;
-        myEvent.Description1 = "Event Description 1";
-        myEvent.Description2 = "Event Description 2";
-        myEvent.Description3 = "Event Description 3";
-        myEvent.Description4 = "Event Description 4";
-        myEvent.Description5 = "Event Description 5";
-        myEvent.EarlyDeadline = DateTime.Now;
-        myEvent.EconomicImpact = 5;
-        myEvent.ForecastAttendance = 5;
-        myEvent.ForecastCost = 5;
-        myEvent.ForecastRevenue = 5;
-        myEvent.FunctionUserFieldsType = "BU|C"; //Code of Function User fields. It consists of [Issue Type]|[Issue Class].  This is populated from [CR158_ISSUE_TYPE]|[CR158_ISSUE_CLASS].                                 
-        myEvent.GLDistribution = "test";
-        myEvent.GLSubAccount = myContactAccount;
-        myEvent.Indicator = "JB";
-        myEvent.Insurance = "Y";
-        myEvent.InventoryChain = "CHAINB";
-        myEvent.LegalName = "Legal Name";
-        myEvent.LegalName1 = "Legal Name 1";
-        myEvent.LegalName2 = "Legal Name 2";
-        myEvent.LegalName3 = "Legal Name 3";
-        myEvent.LegalName4 = "Legal Name 4";
-        myEvent.LegalName5 = "Legal Name 5";
-        myEvent.MajorGroup = "PRG";
-        myEvent.MinorGroup = ".NET";
-        myEvent.Note1 = "Test";
-        myEvent.Note2 = "Test";
-        myEvent.OnSiteOffice = "HALL-A";
-        myEvent.OnSitePhone = "555-555-5555";
-        myEvent.OrderUserFieldsType = "CK|C"; //This is the code of Order User fields.  It consists of [Issue Type]|[Issue Class].  This is populated from [CR158_ISSUE_TYPE]|[CR158_ISSUE_CLASS].                          
-        myEvent.OrderedCost = 5;
-        myEvent.OrderedRevenue = 5;
-        myEvent.OtherActual = 5;
-        myEvent.OtherForecast = 5;
-        myEvent.OtherOrdered = 5;
-        myEvent.OtherRevised = 5;
-        myEvent.ParentEvent = otherEventID;
-        myEvent.PaymentPlan = "50";
-        myEvent.PreviousEvent = otherEventID;
-        myEvent.PriceList = "2001-STD";
-        myEvent.Public = "Y";
-        myEvent.Rank = "T";
-        myEvent.Release = DateTime.Now;
-        myEvent.Requester = myParentAccount;
-        myEvent.RequesterContact = myContactAccount;
-        myEvent.RevisedAttendance = 5;
-        myEvent.RevisedCost = 5;
-        myEvent.RevisedRevenue = 5;
-        myEvent.Salesperson = myAccount;
-        myEvent.Search = "APISRCH";
-        myEvent.Sensitivity = "1";
-        myEvent.StandardDeadline = DateTime.Now;
-        myEvent.Status = "30";  //This is the code for statuses.  Filling this in may affect other fields based on the value.  Greater than 29 is firm, greater than 79 is considered cancelled.                            
-        myEvent.TaxScheme = "DEFAULT";
-        myEvent.Type = "EDU";
-        myEvent.WebAddress = "www.ungerboeck.com";
+      myEvent.Description = "Modified Description";
+      myEvent.SecondCoordinator = myAccount;
+      myEvent.ThirdCoordinator = myAccount;
+      myEvent.FourthCoordinator = myAccount;
+      myEvent.Abbreviation = "MD";
+      myEvent.Account = "COMBINE"; //Just like in Ungerboeck, you may change the account even after an event is created.                                                                                                            
+      myEvent.ActualAttendance = 5;
+      myEvent.ActualCost = 5;
+      myEvent.ActualRevenue = 5;
+      myEvent.AlternateEvent = otherEventID;
+      myEvent.AnchorVenue = "HALL-A"; //Code value for anchor venue                                                                                                                                                       
+      myEvent.Attendance = 5;
+      myEvent.BillTo = myParentAccount; //Account code of bill to account                                                                                                                                                 
+      myEvent.BillToContact = myContactAccount;  //Account code of bill-to contact                                                                                                                                        
+      myEvent.BoxOffice = "Y"; //Y or N                                                                                                                                                                                   
+      myEvent.Category = "CO"; //Category code for event categories                                                                                                                                                       
+      myEvent.Class = "EDU"; //Class code for event classes                                                                                                                                                               
+      myEvent.Contact = myContactAccount;
+      myEvent.ContractRequired = "Y";
+      myEvent.Coordinator = myContactAccount;
+      myEvent.Decision = DateTime.Now;
+      myEvent.Description1 = "Event Description 1";
+      myEvent.Description2 = "Event Description 2";
+      myEvent.Description3 = "Event Description 3";
+      myEvent.Description4 = "Event Description 4";
+      myEvent.Description5 = "Event Description 5";
+      myEvent.EarlyDeadline = DateTime.Now;
+      myEvent.EconomicImpact = 5;
+      myEvent.ForecastAttendance = 5;
+      myEvent.ForecastCost = 5;
+      myEvent.ForecastRevenue = 5;
+      myEvent.FunctionUserFieldsType = "BU|C"; //Code of Function User fields. It consists of [Issue Type]|[Issue Class].  This is populated from [CR158_ISSUE_TYPE]|[CR158_ISSUE_CLASS].                                 
+      myEvent.GLDistribution = "test";
+      myEvent.GLSubAccount = myContactAccount;
+      myEvent.Indicator = "JB";
+      myEvent.Insurance = "Y";
+      myEvent.InventoryChain = "CHAINB";
+      myEvent.LegalName = "Legal Name";
+      myEvent.LegalName1 = "Legal Name 1";
+      myEvent.LegalName2 = "Legal Name 2";
+      myEvent.LegalName3 = "Legal Name 3";
+      myEvent.LegalName4 = "Legal Name 4";
+      myEvent.LegalName5 = "Legal Name 5";
+      myEvent.MajorGroup = "PRG";
+      myEvent.MinorGroup = ".NET";
+      myEvent.Note1 = "Test";
+      myEvent.Note2 = "Test";
+      myEvent.OnSiteOffice = "HALL-A";
+      myEvent.OnSitePhone = "555-555-5555";
+      myEvent.OrderUserFieldsType = "CK|C"; //This is the code of Order User fields.  It consists of [Issue Type]|[Issue Class].  This is populated from [CR158_ISSUE_TYPE]|[CR158_ISSUE_CLASS].                          
+      myEvent.OrderedCost = 5;
+      myEvent.OrderedRevenue = 5;
+      myEvent.OtherActual = 5;
+      myEvent.OtherForecast = 5;
+      myEvent.OtherOrdered = 5;
+      myEvent.OtherRevised = 5;
+      myEvent.ParentEvent = otherEventID;
+      myEvent.PaymentPlan = "50";
+      myEvent.PreviousEvent = otherEventID;
+      myEvent.PriceList = "2001-STD";
+      myEvent.Public = "Y";
+      myEvent.Rank = "T";
+      myEvent.Release = DateTime.Now;
+      myEvent.Requester = myParentAccount;
+      myEvent.RequesterContact = myContactAccount;
+      myEvent.RevisedAttendance = 5;
+      myEvent.RevisedCost = 5;
+      myEvent.RevisedRevenue = 5;
+      myEvent.Salesperson = myAccount;
+      myEvent.Search = "APISRCH";
+      myEvent.Sensitivity = "1";
+      myEvent.StandardDeadline = DateTime.Now;
+      myEvent.Status = "30";  //This is the code for statuses.  Filling this in may affect other fields based on the value.  Greater than 29 is firm, greater than 79 is considered cancelled.                            
+      myEvent.TaxScheme = "DEFAULT";
+      myEvent.Type = "EDU";
+      myEvent.WebAddress = "www.ungerboeck.com";
 
-        //Various date values                                                                                                                                                                                              
-        myEvent.StartDate = DateTime.Now.Date;
-        myEvent.StartTime = DateTime.Now;
-        myEvent.InDate = DateTime.Now.Date;
-        myEvent.InTime = DateTime.Now;
-        myEvent.OutDate = DateTime.Now.Date.AddDays(1);
-        myEvent.OutTime = DateTime.Now;
-        myEvent.EndDate = DateTime.Now.Date.AddDays(1);
-        myEvent.EndTime = DateTime.Now;
+      //Various date values                                                                                                                                                                                              
+      myEvent.StartDate = DateTime.Now.Date;
+      myEvent.StartTime = DateTime.Now;
+      myEvent.InDate = DateTime.Now.Date;
+      myEvent.InTime = DateTime.Now;
+      myEvent.OutDate = DateTime.Now.Date.AddDays(1);
+      myEvent.OutTime = DateTime.Now;
+      myEvent.EndDate = DateTime.Now.Date.AddDays(1);
+      myEvent.EndTime = DateTime.Now;
 
-         return apiClient.Endpoints.Events.Update( myEvent);
-        }
+      var options = new Ungerboeck.Api.Models.Options.Subjects.Events() { BypassBookingConflictCheck = true }; //You can use this if any bookings are implicitly added on the event to avoid booking conflict warnings
+
+      return apiClient.Endpoints.Events.Update(myEvent, options);
+    }
 
     /// <summary>
     /// A basic example of adding an event from a profile.

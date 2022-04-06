@@ -14,7 +14,7 @@ namespace Ungerboeck.Api.Sdk
   internal class AuthUtil
   {
 
-    private static string GenerateJWT(string userId, string key, string secret, DateTime expiration, string proxyUserId = null)
+    private static string GenerateJWT(string userId, string key, string secret, DateTime expiration, DateTime notBefore, string proxyUserId = null)
     {
       var secretGuid = new Guid(secret);
       var symmetricKey = secretGuid.ToByteArray();
@@ -22,11 +22,13 @@ namespace Ungerboeck.Api.Sdk
 
       var utcNow = DateTime.UtcNow;
 
+      if (notBefore == null) notBefore = utcNow;
+
       var tokenDescriptor = new SecurityTokenDescriptor
       {
         Issuer = userId,
         IssuedAt = utcNow,
-        NotBefore = utcNow,
+        NotBefore = notBefore,
         Expires = expiration,
         SigningCredentials = new SigningCredentials(
           new SymmetricSecurityKey(symmetricKey),
@@ -75,11 +77,13 @@ namespace Ungerboeck.Api.Sdk
       if (!Guid.TryParse(client.AuthInfo.Jwt.Key, out _)) throw new Exception("Your Key authorization is not a GUID.  Fill this in with one of the API User's Key GUIDs.");
 
       if (client.AuthInfo.Jwt.Expiration <= DateTime.UtcNow) throw new Exception("Either Authorization.Jwt.Expiration must be set and be later than current UTC time or Authorization.Jwt.AutoRefresh must be set.");
+
+      if (client.AuthInfo.Jwt.Expiration <= client.AuthInfo.Jwt.NotBefore) throw new Exception("Authorization.Jwt.Expiration cannot be less than Authorization.JWT.NotBefore.");
     }
 
     private static void SetJWT(ApiClient client)
     {
-      string jwt = GenerateJWT(client.AuthInfo.Jwt.APIUserID, client.AuthInfo.Jwt.Key, client.AuthInfo.Jwt.Secret, client.AuthInfo.Jwt.Expiration, client.AuthInfo.Jwt.ProxiedUserID);
+      string jwt = GenerateJWT(client.AuthInfo.Jwt.APIUserID, client.AuthInfo.Jwt.Key, client.AuthInfo.Jwt.Secret, client.AuthInfo.Jwt.Expiration, client.AuthInfo.Jwt.NotBefore, client.AuthInfo.Jwt.ProxiedUserID);
       client.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
       client.AuthInfo.Jwt.Jwt = jwt;
     }
