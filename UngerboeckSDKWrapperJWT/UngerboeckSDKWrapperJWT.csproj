@@ -21,6 +21,12 @@
     <PackageTags>Ungerboeck USI SDK API Model Models Endpoints</PackageTags>
   </PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">		
+		<SignAssembly>true</SignAssembly>
+		<AssemblyOriginatorKeyFile>..\..\..\..\..\certificate\UngerboeckApi.snk</AssemblyOriginatorKeyFile>
+		<DelaySign>false</DelaySign>
+	</PropertyGroup>
+
   <ItemGroup>
     <None Remove="Ungerboeck.png" />
   </ItemGroup>
