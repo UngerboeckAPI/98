@@ -244,7 +244,7 @@
       <Version>13.0.1</Version>
     </PackageReference>
     <PackageReference Include="Ungerboeck.Api.Models">
-      <Version>1.98.220316.1208</Version>
+      <Version>1.98.2.4</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
